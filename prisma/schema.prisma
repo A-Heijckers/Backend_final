@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+  url      = "file:./dev.db"
+  relationMode = "prisma"
+}
+
+model User {
+  id          String    @id @default(uuid())
+  username    String    @unique
+  password    String
+  name        String
+  email       String
+  phoneNumber String
+  profilePicture  String
+  Booking     Booking[]
+  reviews     Review[]
+}
+
+model Booking {
+  id             String   @id @default(uuid())
+  propertyId     String
+  property       Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkinDate    DateTime
+  checkoutDate   DateTime
+  numberOfGuests Int
+  totalPrice     Int
+  bookingStatus  String
+
+  @@index([userId])
+  @@index([propertyId])
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String
+
+  @@index([userId])
+  @@index([propertyId])
+}
+
+model Property {
+  id            String    @id @default(uuid())
+  title         String
+  description   String
+  location      String
+  pricePerNight Decimal   
+  bedroomCount  Int
+  bathRoomCount Int
+  maxGuestCount Int
+  rating        Int
+  bookings      Booking[]
+  reviews       Review[]
+  amenities     Amenity[] 
+  host          Host      @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  hostId        String
+
+  @@index([hostId])
+}
+
+model Amenity {
+  id       String     @id @default(uuid())
+  name     String
+  properties Property[]
+}
+
+model Host {
+  id          String     @id @default(uuid())
+  username    String     @unique
+  password    String
+  name        String
+  email       String
+  phoneNumber String
+  profilePicture  String
+  aboutMe     String
+  listings    Property[]
+}
